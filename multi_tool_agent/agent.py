@@ -113,14 +113,14 @@ def book_flight(flight_number: str, fare_id: str) -> dict:
     return {"status": "success", "confirmation_id": "C-1982-W1"}
 
 
-root_agent = Agent(
-    name="travel_agent",
+flight_booking_agent = Agent(
+    name="flight_booking_agent",
     model="gemini-2.0-flash",
     description=(
-        "Agent to help users booking travel reservations and flights."
+        "Agent to help users book flights."
     ),
     instruction=(
-        """You are a helpful agent who can help users book travel reservations and flights.
+        """You are a helpful agent who can help users book flights.
 
 If a user wants to book a flight, do the following in order:
 1. Ask for departure and destination cities.
@@ -134,5 +134,21 @@ If a user wants to book a flight, do the following in order:
 Otherwise inform the user that their request cannot be fulfilled."""
     ),
     tools=[get_airports_in_city, get_flights, get_flight_fares, book_flight],
+)
+
+root_agent = Agent(
+    name="travel_agent",
+    model="gemini-2.0-flash",
+    description=(
+        "Agent to help users booking travel reservations and flights."
+    ),
+    instruction=(
+        """You are a helpful agent who can help users book travel reservations and flights.
+
+* Delegate flight booking requests to `flight_booking_agent`.
+
+For any other request, inform the user that their request cannot be fulfilled."""
+    ),
+    sub_agents=[flight_booking_agent],
     # tools=[],
 )
