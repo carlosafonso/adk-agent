@@ -110,11 +110,17 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     if "BICIMAD_API_ACCESS_TOKEN" in os.environ:
+        logging.info(
+            "BiciMad API provided creds is access token. Will skip log in.")
+
         client_id = ""
         passkey = ""
         bicimad_client = EnhancedBiciMad(x_client_id="", pass_key="")
         bicimad_client._access_token = os.environ["BICIMAD_API_ACCESS_TOKEN"]
     elif "BICIMAD_API_CLIENT_ID" in os.environ and "BICIMAD_API_PASSKEY" in os.environ:
+        logging.info(
+            "BiciMad API provided creds are Client ID and passkey. Will log in.")
+
         bicimad_client = EnhancedBiciMad(
             x_client_id=os.environ["BICIMAD_API_CLIENT_ID"],
             pass_key=os.environ["BICIMAD_API_PASSKEY"]
