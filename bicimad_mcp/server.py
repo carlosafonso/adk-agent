@@ -134,10 +134,10 @@ if __name__ == "__main__":
         bicimad=bicimad_client,
     )
 
-    mcp.add_tool(
-        ts.get_closest_bike_station_to_coordinates,
-        description="Returns a list of the closest bike stations to the provided geographical coordinates."
-    )
+    # mcp.add_tool(
+    #     ts.get_closest_bike_station_to_coordinates,
+    #     description="Returns a list of the closest bike stations to the provided geographical coordinates."
+    # )
     mcp.add_tool(
         ts.get_closest_bike_stations_to_address,
         description="Returns a list of the closest bike stations to the provided address."
