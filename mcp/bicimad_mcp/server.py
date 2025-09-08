@@ -9,11 +9,6 @@ import requests
 from fastmcp import FastMCP
 from mobilitylabs.bicimad import BiciMad
 
-mcp = FastMCP(
-    "BiciMad API",
-    instructions="This server allows interacting with the BiciMad API. BiciMad is Madrid's municipal bike rental service."
-)
-
 
 class EnhancedBiciMad(BiciMad):
     def info_bike_stations_around_lng_lat(self, lng: float, lat: float, radius: int):
@@ -106,7 +101,7 @@ class BicimadMcpToolset:
     #     }
 
 
-if __name__ == "__main__":
+def init_server():
     logging.basicConfig(level=logging.INFO)
 
     if "BICIMAD_API_ACCESS_TOKEN" in os.environ:
@@ -129,20 +124,30 @@ if __name__ == "__main__":
     else:
         raise Exception("No BiciMad API credentials available in env vars.")
 
+    if "GOOGLE_MAPS_API_KEY" not in os.environ:
+        raise Exception("No Google Maps API key present in env vars.")
+
+    logging.info("Using API maps key {}".format(
+        os.environ["GOOGLE_MAPS_API_KEY"]))
     ts = BicimadMcpToolset(
         gmaps_client=googlemaps.Client(key=os.environ["GOOGLE_MAPS_API_KEY"]),
         bicimad=bicimad_client,
+    )
+
+    mcp = FastMCP(
+        "BiciMad API",
+        instructions="This server allows interacting with the BiciMad API. BiciMad is Madrid's municipal bike rental service."
     )
 
     # mcp.add_tool(
     #     ts.get_closest_bike_station_to_coordinates,
     #     description="Returns a list of the closest bike stations to the provided geographical coordinates."
     # )
-    mcp.add_tool(
+    mcp.tool(
         ts.get_closest_bike_stations_to_address,
         description="Returns a list of the closest bike stations to the provided address."
     )
-    mcp.add_tool(
+    mcp.tool(
         ts.get_bike_station_info,
         description="Returns information about a bike station."
     )
@@ -151,4 +156,13 @@ if __name__ == "__main__":
     #     description="Returns information about an individual bike."
     # )
 
-    mcp.run()  # Default: uses STDIO transport
+    return mcp
+
+
+if __name__ == "__main__":
+    mcp = init_server()
+
+    port = int(os.environ.get("PORT", "8000"))
+
+    # mcp.run()  # Default: uses STDIO transport
+    mcp.run(transport="http", host="0.0.0.0", port=port)

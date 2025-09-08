@@ -1,7 +1,5 @@
-import os
-
 from google.adk.agents import Agent
-from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StreamableHTTPConnectionParams
 
 bicimad_agent = Agent(
     name="bicimad_agent",
@@ -19,15 +17,11 @@ For any other request, inform the user that their request cannot be fulfilled.
     ),
     tools=[
         MCPToolset(
-            connection_params=StdioServerParameters(
-                command='python',
-                args=['../bicimad_mcp/server.py'],
-                env={
-                    "GOOGLE_MAPS_API_KEY": os.environ["GOOGLE_MAPS_API_KEY"],
-                    "BICIMAD_API_CLIENT_ID": os.environ["BICIMAD_API_CLIENT_ID"],
-                    "BICIMAD_API_PASSKEY": os.environ["BICIMAD_API_PASSKEY"],
-                }
-            )
+            connection_params=StreamableHTTPConnectionParams(
+                url="https://mcp-bicimad-884913148404.europe-west1.run.app/mcp",
+            ),
+            # This is needed, otherwise deployment fails with Pickle serialization errors. (See https://github.com/google/adk-python/issues/1727)
+            errlog=None,
         )
     ],
 )
