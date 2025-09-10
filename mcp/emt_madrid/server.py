@@ -7,6 +7,7 @@ from typing import Any, Dict, List
 import googlemaps
 import requests
 from fastmcp import FastMCP
+from mobilitylabs.busemtmad import BusEMTMad
 from mobilitylabs.bicimad import BiciMad
 
 
@@ -38,6 +39,26 @@ def normalize_bike_station_info(station_data) -> Dict[str, any]:
         "free_slots": station_data["free_bases"],
         "operational": station_data["activate"] == 1,
     }
+
+
+class EmtMadridMcpToolset:
+    def __init__(self, emt_client: BusEMTMad):
+        # self.__gmaps_client = gmaps_client
+        self.__emt_client = emt_client
+
+    def get_current_incidents(self):
+        results = self.__emt_client.issues("all")
+
+        if results is not None:
+            return {
+                "status": "success",
+                "data": results,
+            }
+
+        return {
+            "status": "error",
+            "reason": "API returned an error",
+        }
 
 
 class BicimadMcpToolset:
@@ -104,23 +125,29 @@ class BicimadMcpToolset:
 def init_server():
     logging.basicConfig(level=logging.INFO)
 
-    if "BICIMAD_API_ACCESS_TOKEN" in os.environ:
+    if "EMT_API_ACCESS_TOKEN" in os.environ:
         logging.info(
             "BiciMad API provided creds is access token. Will skip log in.")
 
         client_id = ""
         passkey = ""
         bicimad_client = EnhancedBiciMad(x_client_id="", pass_key="")
-        bicimad_client._access_token = os.environ["BICIMAD_API_ACCESS_TOKEN"]
-    elif "BICIMAD_API_CLIENT_ID" in os.environ and "BICIMAD_API_PASSKEY" in os.environ:
+        bicimad_client._access_token = os.environ["EMT_API_ACCESS_TOKEN"]
+    elif "EMT_API_CLIENT_ID" in os.environ and "EMT_API_PASSKEY" in os.environ:
         logging.info(
             "BiciMad API provided creds are Client ID and passkey. Will log in.")
 
         bicimad_client = EnhancedBiciMad(
-            x_client_id=os.environ["BICIMAD_API_CLIENT_ID"],
-            pass_key=os.environ["BICIMAD_API_PASSKEY"]
+            x_client_id=os.environ["EMT_API_CLIENT_ID"],
+            pass_key=os.environ["EMT_API_PASSKEY"]
         )
         bicimad_client.log_in()
+
+        emt_client = BusEMTMad(
+            x_client_id=os.environ["EMT_API_CLIENT_ID"],
+            pass_key=os.environ["EMT_API_PASSKEY"]
+        )
+        emt_client.log_in()
     else:
         raise Exception("No BiciMad API credentials available in env vars.")
 
@@ -128,33 +155,37 @@ def init_server():
         raise Exception("No Google Maps API key present in env vars.")
 
     logging.info("Using API maps key {}".format(
-        os.environ["GOOGLE_MAPS_API_KEY"]))
-    ts = BicimadMcpToolset(
+        os.environ["GOOGLE_MAPS_API_KEY"])
+    )
+
+    bicimad_ts = BicimadMcpToolset(
         gmaps_client=googlemaps.Client(key=os.environ["GOOGLE_MAPS_API_KEY"]),
         bicimad=bicimad_client,
     )
+    emt_ts = EmtMadridMcpToolset(emt_client=emt_client)
 
     mcp = FastMCP(
-        "BiciMad API",
-        instructions="This server allows interacting with the BiciMad API. BiciMad is Madrid's municipal bike rental service."
+        "EMT Madrid API",
+        instructions="This server allows interacting with the API of Madrid's municipal transportation authority (EMT). Includes access to information related to BiciMad (Madrid's municipal bike rental service) and Madrid's bus network."
     )
 
-    # mcp.add_tool(
-    #     ts.get_closest_bike_station_to_coordinates,
-    #     description="Returns a list of the closest bike stations to the provided geographical coordinates."
-    # )
     mcp.tool(
-        ts.get_closest_bike_stations_to_address,
-        description="Returns a list of the closest bike stations to the provided address."
+        bicimad_ts.get_closest_bike_stations_to_address,
+        description="Returns a list of the closest BiciMad bike stations to the provided address."
     )
     mcp.tool(
-        ts.get_bike_station_info,
-        description="Returns information about a bike station."
+        bicimad_ts.get_bike_station_info,
+        description="Returns information about a BiciMad bike station."
     )
     # mcp.add_tool(
     #     ts.get_bike_info,
     #     description="Returns information about an individual bike."
     # )
+
+    mcp.tool(
+        emt_ts.get_current_incidents,
+        description="Returns a list of current incidents in Madrid's bus network."
+    )
 
     return mcp
 
