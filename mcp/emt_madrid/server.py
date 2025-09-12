@@ -11,6 +11,14 @@ from mobilitylabs.busemtmad import BusEMTMad
 from mobilitylabs.bicimad import BiciMad
 
 
+def error_response(reason: str | None) -> Dict[str, str | None]:
+    return {"status": "error", "reason": reason}
+
+
+def success_response(data: any) -> Dict[str, any]:
+    return {"status": "success", "data": data}
+
+
 class EnhancedBiciMad(BiciMad):
     def info_bike_stations_around_lng_lat(self, lng: float, lat: float, radius: int):
         url = "%s/transport/bicimad/stations/arroundxy/%s/%s/%s/" % (
@@ -50,15 +58,9 @@ class EmtMadridMcpToolset:
         results = self.__emt_client.issues("all")
 
         if results is not None:
-            return {
-                "status": "success",
-                "data": results,
-            }
+            return success_response(results)
 
-        return {
-            "status": "error",
-            "reason": "API returned an error",
-        }
+        return error_response("API returned an error")
 
 
 class BicimadMcpToolset:
@@ -74,15 +76,9 @@ class BicimadMcpToolset:
         )
 
         if results is not None:
-            return {
-                "status": "success",
-                "data": list(map(normalize_bike_station_info, results)),
-            }
+            return success_response(list(map(normalize_bike_station_info, results)))
 
-        return {
-            "status": "error",
-            "reason": "API returned an error",
-        }
+        return error_response("API returned an error")
 
     def get_closest_bike_stations_to_address(self, address: str) -> Dict[str, Any]:
         geocoded_address = self.__gmaps_client.geocode(
@@ -92,9 +88,7 @@ class BicimadMcpToolset:
         )
 
         if (len(geocoded_address)) < 1:
-            return {
-                "status": "error",
-            }
+            return error_response("Could not geocode address")
 
         return self.get_closest_bike_station_to_coordinates(
             geocoded_address[0]["geometry"]["location"]["lat"],
@@ -105,15 +99,9 @@ class BicimadMcpToolset:
         results = self.__bicimad.info_bike_station(station_id)
 
         if results is not None:
-            return {
-                "status": "success",
-                "data": normalize_bike_station_info(results[0]) if len(results) else [],
-            }
+            return success_response(normalize_bike_station_info(results[0]) if len(results) else [])
 
-        return {
-            "status": "error",
-            "reason": "API returned an error",
-        }
+        return error_response("API returned an error")
 
     # def get_bike_info(self, bike_id: int) -> Dict[str, Any]:
     #     return {
