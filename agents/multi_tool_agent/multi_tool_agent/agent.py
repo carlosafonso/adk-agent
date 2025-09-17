@@ -115,7 +115,7 @@ def book_flight(flight_number: str, fare_id: str) -> dict:
 
 flight_booking_agent = Agent(
     name="flight_booking_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash-lite",
     description=(
         "Agent to help users book flights."
     ),
@@ -138,7 +138,7 @@ Otherwise inform the user that their request cannot be fulfilled."""
 
 root_agent = Agent(
     name="travel_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash-lite",
     description=(
         "Agent to help users booking travel reservations and flights."
     ),

@@ -1,5 +1,3 @@
-import datetime
-from zoneinfo import ZoneInfo
 from google.adk.agents import Agent
 
 
@@ -20,7 +18,7 @@ def respond_to_user(user_input: str) -> dict:
 
 root_agent = Agent(
     name="responder",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash-lite",
     description=(
         "Agent to have interactions with users."
     ),

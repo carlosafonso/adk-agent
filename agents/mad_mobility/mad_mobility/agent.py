@@ -37,7 +37,7 @@ def get_mcp_toolset():
 
 bicimad_agent = Agent(
     name="bicimad_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash-lite",
     description=(
         "Agent to help users using BiciMad, Madrid's municipal bike rental service."
     ),
@@ -54,7 +54,7 @@ For any other request, inform the user that their request cannot be fulfilled.
 
 bus_agent = Agent(
     name="bus_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash-lite",
     description=(
         "Agent to help users getting information about Madrid's bus network."
     ),
@@ -71,7 +71,7 @@ For any other request, inform the user that their request cannot be fulfilled.
 
 root_agent = Agent(
     name="mad_mobility_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash-lite",
     description=(
         "Assists users with navigating the city of Madrid."
     ),
