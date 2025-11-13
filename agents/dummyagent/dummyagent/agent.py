@@ -1,19 +1,20 @@
 from google.adk.agents import Agent
 
 
-def respond_to_user(user_input: str) -> dict:
-    """Responds to anything the user says.
+def generate_response(user_input: str) -> dict:
+    """Produces an appropriate response to a given user input.
 
     Args:
         user_input (str): What the user said.
 
     Returns:
-        dict: status and appropriate response to return to the user.
+        str: the appropriate response to return to the user
     """
-    return {
-        "status": "success",
-        "response": "You said " + str(len(user_input)) + " characters!",
-    }
+    # return {
+    #     "status": "success",
+    #     "response": "You said " + str(len(user_input)) + " characters!",
+    # }
+    return "You said " + str(len(user_input)) + " characters!"
 
 
 root_agent = Agent(
@@ -23,9 +24,9 @@ root_agent = Agent(
         "Agent to have interactions with users."
     ),
     instruction=(
-        """You are a helpful agent who can  reply to anything that the user says.
+        """You are a helpful agent who can reply to anything that the user says.
 
-* Always use the `respond_to_user` tool when replying to a user."""
+* Always use the `generate_response` to generate the response to be given to the user. Use the output of this tool as-is."""
     ),
-    tools=[respond_to_user],
+    tools=[generate_response],
 )
