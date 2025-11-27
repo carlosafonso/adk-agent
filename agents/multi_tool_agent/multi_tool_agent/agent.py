@@ -33,6 +33,16 @@ def get_airports_in_city(city: str) -> dict:
             "status": "success",
             "airport_codes": ["BCN"],
         }
+    if normalized_city_name == "zaragoza":
+        return {
+            "status": "success",
+            "airport_codes": ["ZAZ"],
+        }
+    if normalized_city_name == "rome":
+        return {
+            "status": "success",
+            "airport_codes": ["FCO"],
+        }
 
     return {
         "status": "error",
@@ -56,6 +66,7 @@ def get_flights(origin_iata_code: str, destination_iata_code: str) -> dict:
         ("British Airways", "BAW553", "JFK", "LHR"),
         ("Vueling", "VYG99", "MAD", "BCN"),
         ("Vueling", "VYG98", "BCN", "MAD"),
+        ("Wizz Air", "W46190", "ZAZ", "FCO"),
     ]
 
     filtered = filter(
